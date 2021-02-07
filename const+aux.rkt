@@ -1,0 +1,177 @@
+#lang racket
+
+(require lang/posn 2htdp/image)
+(provide (all-defined-out))
+
+
+
+;; ================ DATA DEFINITIONS: ================
+
+(define-struct tet [hand blocks])
+;; Tetr is a Structure
+;; (make-tetr (Posn, ListOf(Posn))
+;; Implementation:
+;; tetr-hand describes where the current falling controllable block is located
+;; tetr-blocks describes where the other already fallen blocks are
+
+;;================ Quality of life aux. functions: ================
+;; debatable, if tests are valid here, still should fit in somehow ̄\_(ツ)_/̄
+
+;; Num -> Num
+;; halves the given number
+(define (half num)
+  (/ num 2))
+
+(define PEN
+  (make-pen "black" 1 "solid" "round" "round"))
+
+;; Num Image -> Image
+;; An auxiliary function for drawing x portion of the grid
+(define (aux-grid-x num img)
+  (cond
+    [(= num X-LINES) img]
+    [else (aux-grid-x
+           (+ num 1)
+           (add-line
+            img
+            0
+            (aux-x-position num)
+            (image-width BORDER)
+            (aux-x-position num)
+            PEN
+             ))]))
+
+;; Num Image -> Image
+;; An auxiliary function for drawing y portion of the grid
+(define (aux-grid-y num img)
+  (cond
+    [(= num Y-LINES) img]
+    [else (aux-grid-y
+           (+ num 1)
+           (add-line
+            img
+            (aux-y-position num)
+            0
+            (aux-y-position num)
+            (image-height BORDER)
+            PEN
+             ))]))
+
+;; Num -> Num
+;; Auxiliary for aux-grid-x for calculating the actual start and end point of the line
+(define (aux-x-position num)
+  (* (+ SHIVER num) CUBE-LENGTH))
+
+;; Num -> Num
+;; Auxiliary for aux-grid-y for calculating the actual start and end point of the line
+(define (aux-y-position num)
+  (* num CUBE-LENGTH))
+
+
+;; ================ Mathematical constants (mostly): ================
+(define CUBE-LENGTH 25)
+(define SCENE-WIDTH-INDEX 20)
+(define SCENE-HEIGHT-INDEX 30)
+(define SCENE-WIDTH (* SCENE-WIDTH-INDEX CUBE-LENGTH))
+(define SCENE-HEIGHT (* SCENE-HEIGHT-INDEX CUBE-LENGTH))
+(define HALF-SCENE-WIDTH (half SCENE-WIDTH))
+(define HALF-SCENE-HEIGHT (half SCENE-HEIGHT)) 
+(define MTSC (empty-scene SCENE-WIDTH SCENE-HEIGHT))
+(define SHIVER 0.4)
+
+(define X-OFFSET (* 4.5 CUBE-LENGTH)) ;; breaks when SCENE-WIDTH//HEIGHT-INDEX is changed, careful!!! 
+(define Y-OFFSET (* 25.7 CUBE-LENGTH)) ;; breaks when SCENE-WIDTH//HEIGHT-INDEX is changed, careful!!! 
+  
+;; these are just for drawing purposes and they mean how many || are there to each axis in a grid
+(define X-LINES 20)
+(define Y-LINES 10)
+
+(define CLOCK-SPEED 0.25)
+
+(define WHITE-SPACE-Y-POS (half (* 5.5 CUBE-LENGTH)))
+
+;; ================ Graphical constants (mostly): ================
+
+(define BLOCK (square CUBE-LENGTH "solid" "red"))
+(define BORDER (rectangle (* Y-LINES CUBE-LENGTH) (* (+ X-LINES SHIVER) CUBE-LENGTH) "outline" "black"))
+(define GRID-X
+  (aux-grid-x 0 BORDER))
+(define GRID-Y
+  (aux-grid-y 0 BORDER))
+(define GRID (aux-grid-x 0 (aux-grid-y 1 BORDER)))
+(define WHITE-SPACE (rectangle (half SCENE-WIDTH) (- SCENE-HEIGHT Y-OFFSET) "solid" "white"))
+
+;;================ Pictures: ================
+;; Basic layout:
+(define LAYOUT (place-image GRID HALF-SCENE-WIDTH HALF-SCENE-HEIGHT MTSC))
+
+;; ================ Testing sets: ================
+
+;; schematic->actual
+(define S->A-EX1 (list (make-posn 1 1) (make-posn 10 1)))
+(define S->A-EX2 (list (make-posn 1 20) (make-posn 10 20)))
+(define S->A-EX3 (list (make-posn 1 10) (make-posn 10 10)))
+(define S->A-EX4 (list (make-posn 5 1) (make-posn 5 20)))
+;; draw-blocks + draw
+(define DB-EX1 (make-tet (make-posn 3 4) S->A-EX1))
+(define DB-EX2 (make-tet (make-posn 6 8) S->A-EX2))
+(define DB-EX3 (make-tet (make-posn 2 2) S->A-EX3))
+(define DB-EX4 (make-tet (make-posn 4 15) S->A-EX4))
+;; block-list
+(define BL-EX1 1)
+(define BL-EX2 5)
+(define BL-EX3 7)
+
+;; tock:
+
+;; falls:
+(define TOCK-F-EX1 (make-tet (make-posn 5 21) (list)))
+(define TOCK-F-EX2 (make-tet (make-posn 5 3) (list (make-posn 5 1))))
+(define TOCK-F-EX3 (make-tet (make-posn 1 10) (list (make-posn 1 8))))
+;; Very useful for ke handler!!!
+(define TOCK-F-EX4 (make-tet (make-posn 5 3)
+                             (list (make-posn 4 3) (make-posn 4 2) (make-posn 4 1) (make-posn 6 3)  (make-posn 6 2) (make-posn 6 1) (make-posn 5 1))))
+
+;; is blocked:
+(define TOCK-B-EX1 (make-tet (make-posn 1 2) (list (make-posn 1 1))))
+(define TOCK-B-EX2 (make-tet (make-posn 5 1) (list)))
+(define TOCK-B-EX3 (make-tet (make-posn 1 1) (list)))
+(define TOCK-B-EX4 (make-tet (make-posn 5 15) (list (make-posn 5 14))))
+(define TOCK-B-EX5 (make-tet (make-posn 10 2) (list (make-posn 10 1))))
+
+;; control:
+;; hand:
+(define HAND-CTRL-EX1 (make-posn 5 10)) ;; middle
+(define HAND-CTRL-EX2 (make-posn 1 10)) ;; left corner
+(define HAND-CTRL-EX3 (make-posn 10 10)) ;; right corner
+(define HAND-CTRL-EX4 (make-posn 3 4)) ;; where it could be blocked by blocks
+;; blocks:
+(define BLOCKS-CTRL-EX1 (list)) ;; no blocks
+(define BLOCKS-CTRL-EX2 (list (make-posn 2 10))) ;; 1 to the right of left corner
+(define BLOCKS-CTRL-EX3 (list (make-posn 9 10))) ;; 1 to the left of right corner
+(define BLOCKS-CTRL-EX4 (list (make-posn 2 4) (make-posn 4 4))) ;; blocking the HAND-CTR-EX4 from both sides
+
+;; OK
+(define CTRL-L-EX1 (make-tet HAND-CTRL-EX1 BLOCKS-CTRL-EX1)) ;; middle on empty field
+(define CTRL-L-EX2 (make-tet HAND-CTRL-EX3 BLOCKS-CTRL-EX2)) ;; right corner, blocked on the left
+;; blocked                    
+(define CTRL-L-EX3 (make-tet HAND-CTRL-EX3 BLOCKS-CTRL-EX3)) ;; blocked by block and wall, slams into block
+(define CTRL-L-EX4 (make-tet HAND-CTRL-EX2 BLOCKS-CTRL-EX4)) ;; blocked by left corner
+(define CTRL-L-EX5 (make-tet HAND-CTRL-EX4 BLOCKS-CTRL-EX4)) ;; blocked by block to the left
+(define CTRL-L-EX6 (make-tet HAND-CTRL-EX2 BLOCKS-CTRL-EX1)) ;; blocked by left corner, no blocks around
+;; OK
+(define CTRL-R-EX1 (make-tet HAND-CTRL-EX1 BLOCKS-CTRL-EX1)) ;; middle on empty field
+(define CTRL-R-EX2 (make-tet HAND-CTRL-EX2 BLOCKS-CTRL-EX3)) ;; left corner block on right corner
+;; Blocked
+(define CTRL-R-EX3 (make-tet HAND-CTRL-EX2 BLOCKS-CTRL-EX2)) ;;blocked by block and wall slams into block
+(define CTRL-R-EX4 (make-tet HAND-CTRL-EX3 BLOCKS-CTRL-EX4)) ;; blocked by right corner
+(define CTRL-R-EX5 (make-tet HAND-CTRL-EX4 BLOCKS-CTRL-EX4)) ;; blocked by block to the right
+(define CTRL-R-EX6 (make-tet HAND-CTRL-EX3 BLOCKS-CTRL-EX1)) ;; blocked by right corner, no block around
+;; move-down
+(define CTRL-D-EX1 (make-tet (make-posn 1 1) (list))) ;; can't move down because of the floor
+(define CTRL-D-EX2 (make-tet (make-posn 1 2) (list (make-posn 1 1)))) ;; can't move down because it is blocked by a block
+(define CTRL-D-EX3 (make-tet (make-posn 5 3) (list (make-posn 5 1) (make-posn 5 2)))) ;; can't move down because it is blocked by a block
+
+
+                   
+
