@@ -1,7 +1,6 @@
 #lang racket
 (require 2htdp/universe
          2htdp/image
-         test-engine/racket-tests
          lang/posn
          "const+aux.rkt"
          "draw.rkt"

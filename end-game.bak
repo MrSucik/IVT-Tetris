@@ -3,7 +3,7 @@
 (require 2htdp/image
          "const+aux.rkt"
          lang/posn
-         test-engine/racket-tests)
+         test-engine/racket-gui)
 (provide (all-defined-out))
 
 ;; end-game:
