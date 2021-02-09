@@ -30,8 +30,6 @@
    (schematic->actual (append (list (tet-hand tet)) (tet-blocks tet)))
    bckg))
 
-
-
 ;; ListOf(Posn) -> ListOf(Posn)
 ;; converts the schematic description of posn on the board to actual applicable values
 (define (schematic->actual pos)
@@ -44,7 +42,4 @@
 (define (block-list n)
   (for/list([x (in-range n)])
     BLOCK))
-
-
-
 

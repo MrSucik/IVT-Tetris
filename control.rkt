@@ -25,8 +25,6 @@
     [(string=? ke "down") (move-down (tet-hand tet) (tet-blocks tet))]
     [else tet]))
 
-
-
 ;; Posn(tet-hand) ListOf(Posn)(tet-blocks) -> Bool
 ;; returns false, if any of the tet-blocks are tet-hand(x-1,y)or if they are on the border
 ;; 1. there is -> false
@@ -37,8 +35,6 @@
     [(= (posn-x hand) 1) #f]
     [(aux-blocked? (make-posn (- (posn-x hand) 1) (posn-y hand)) blocks) #f]
     [else #t]))
-
-
 
 ;; Posn(tet-hand) ListOf(Posn)(tet-blocks) -> Bool
 ;; returns false, if any of the tet-blocks are tet-hand(x+1,y)
@@ -51,21 +47,15 @@
     [(aux-blocked? (make-posn (+ (posn-x hand) 1) (posn-y hand)) blocks) #f]
     [else #t]))
 
-
-
 ;; Posn(hand) -> Posn
 ;; substracts 1 from posn-x and moves the block left
 (define (move-left hand)
   (make-posn (- (posn-x hand) 1) (posn-y hand)))
 
-
-
 ;; Posn(hand) -> Posn
 ;; adds 1 to posn-x and moves the block left
 (define (move-right hand)
   (make-posn (+ (posn-x hand) 1) (posn-y hand)))
-
-
 
 ;; Posn(tet-hand) ListOf(Posn)(tet-blocks)-> Tet
 ;; Moves the tet-hand block one down if not blocked, if so sticks it to the tet-blocks
@@ -75,10 +65,3 @@
   (cond
     [(is-blocked? hand blocks) (make-tet (make-posn 5 22) (block hand blocks))]
     [else (make-tet (make-posn (posn-x hand) (- (posn-y hand) 1)) blocks)]))
-
-
-(test)
-
-
-  
-  

@@ -62,9 +62,9 @@
    (test-suite
     "OK"
     (test-case "move left in middle, not blocked"
-               (check-equal?
-                (control CTRL-L-EX1 "left")
-                (make-tet (make-posn 4 10) (list))))
+               
+               (control CTRL-L-EX1 "left")
+               (make-tet (make-posn 4 10) (list)))
     (test-case "move left in right corner, block on opposite side, not blocked"
                (control CTRL-L-EX2 "left")
                (make-tet (make-posn 9 10) (list (make-posn 2 10))))
@@ -107,17 +107,17 @@
                CTRL-R-EX3)
     (test-case "move right blocked by block"
                (control CTRL-R-EX5 "right")
-               CTRL-R-EX5))
+               CTRL-R-EX5)))
    (test-suite
     "Move-down"
     (test-case "can't move because of the floor"
-               (control CTRL-D-EX1)
+               (control CTRL-D-EX1 "down")
                (make-tet (make-posn 5 22) (list (make-posn 1 1)))) ;; add positive outcomes too
     (test-case "can't move because of block one up"
-               (control CTRL-D-EX2)
+               (control CTRL-D-EX2 "down")
                (make-tet (make-posn 5 22) (list (make-posn 1 1) (make-posn 1 2))))
     (test-case "can't move because of block two up"
-               (control CTRL-D-EX3)
+               (control CTRL-D-EX3 "down")
                (make-tet (make-posn 5 22) (list (make-posn 5 1) (make-posn 5 2) (make-posn 5 3)))))
     
    (test-suite
@@ -204,7 +204,7 @@
                (make-tet (make-posn 5 22) (list (make-posn 1 1) (make-posn 1 2))))
     (test-case "new block, hit block two above bottom"
                (move-down HAND-CTRL-EX7 BLOCKS-CTRL-EX6)
-               (make-tet (make-posn 5 22) (list (make-posn 5 1) (make-posn 5 2) (make-posn 5 3))))))))
+               (make-tet (make-posn 5 22) (list (make-posn 5 1) (make-posn 5 2) (make-posn 5 3)))))))
                
     
                

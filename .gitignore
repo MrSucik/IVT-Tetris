@@ -1,16 +1,11 @@
-# gitignore template for the Racket language
-# website: http://www.racket-lang.org/
-
-# DrRacket autosave files
-*.rkt~
-*.rkt.bak
-*.bak
-\#*.rkt#
-\#*.rkt#*#
-
-# Compiled racket bytecode
+# Racket compiled files
 compiled/
-*.zo
+doc/
 
-# Dependency tracking files
-*.dep
+# common backups, autosaves, lock files, OS meta-files
+*~
+\#*
+.#*
+.DS_Store
+*.bak
+TAGS
